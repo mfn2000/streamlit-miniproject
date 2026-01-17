@@ -275,7 +275,7 @@ fig_map.update_layout(
     coloraxis_colorbar=dict(
         title="Delay Rate (%)",
         title_font=dict(
-            color="#393939",   # warna judul colorbar
+            color="#4E4E4E", 
             size=14,
             family="Arial"
         ),
@@ -422,6 +422,21 @@ airline_order = (
 
 airline_order_list = airline_order["airline"].tolist()
 
+# Total flights per airline & delay category
+data_grouped = (
+    bar_data_named
+    .groupby(["airline", "delay_category"], as_index=False)["total_flights"]
+    .sum()
+)
+
+# Hitung persentase per airline
+data_grouped["percent"] = data_grouped.groupby("airline")["total_flights"].transform(lambda x: 100 * x / x.sum())
+
+# Buat label persentase hanya jika total_flights kategori >= 3250
+data_grouped["label"] = data_grouped.apply(
+    lambda row: f"{row['percent']:.1f}%" if row['total_flights'] >= 3200 else "",
+    axis=1
+)
 
 with col_right:
     st.markdown(
@@ -432,15 +447,14 @@ with col_right:
     )
 
     fig_bar_h = px.bar(
-        bar_data_named,
+        data_grouped,
         y="airline",
         x="total_flights",
         color="delay_category",
         orientation="h",
         barmode="stack",
-        category_orders={
-            "airline": airline_order_list
-        },
+        text="label",  # label cuma muncul untuk percent >= threshold
+        category_orders={"airline": airline_order_list},
         color_discrete_map={
             "On-time (within 15 min)": "#3c51ad",
             "Moderate Delay (16-60 min)": "#ffda6b",
@@ -452,15 +466,16 @@ with col_right:
         }
     )
 
+    fig_bar_h.update_traces(textposition='inside')  # label di dalam bar
     fig_bar_h.update_layout(
         xaxis_title="Number of Flights",
         yaxis_title=None,
         legend_title="Delay Category",
-        template="plotly_white",  # tetap pakai white template
-        height=500,
+        template="plotly_white",
+        height=600,
         margin=dict(l=0, r=0, t=0, b=0),
-        plot_bgcolor='rgba(0,0,0,0)',  # area di dalam chart
-        paper_bgcolor='rgba(0,0,0,0)'  # area sekitar chart
+        plot_bgcolor='rgba(0,0,0,0)',
+        paper_bgcolor='rgba(0,0,0,0)'
     )
 
     st.plotly_chart(fig_bar_h, use_container_width=True)
