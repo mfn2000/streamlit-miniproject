@@ -52,11 +52,12 @@ with header_left:
 
 with header_right:
     f1, f2 = st.columns(2)
+
 st.markdown("""
 <style>
 /* Ubah warna label multiselect */
 div[data-baseweb="select"] > div > div > div:first-child {
-    color: black !important;
+    color: white !important;
     font-weight: bold;
     font-size: 16px;
 }
