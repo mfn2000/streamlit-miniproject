@@ -13,13 +13,45 @@ st.markdown("""
 /* Main app container */
 .st-emotion-cache-zy6yx3 {
     padding-bottom: 2.5rem !important;  
+    background-image: linear-gradient(to bottom, #011f4c 0%, #2d74dc 35%, #e9eef6 35%, #e9eef6 100%) !important;
+    background-color: #f2f2f2 !important;
 }
-
+            
+.st-emotion-cache-1jsf23j {
+    font-size: 1rem;
+    color: #ffffff !important;
+}
+            
+.st-bq {
+    background-color: #2d74dc;
+}
 </style>
 """, unsafe_allow_html=True)
 
-st.title("FLIGHT DELAY ANALYSIS")
-st.caption("Port Authority of New York & New Jersey • Jun - Dec 2024")
+# ------------------------ Header and Filter ------------------------
+header_left, header_right = st.columns([2, 1])
+
+with header_left:
+    st.markdown("""
+    <div>
+        <h1 style="
+            color:#ffffff; 
+            font-family: Arial, sans-serif; 
+            font-weight:bold;
+            margin:0;
+            padding:0;
+        ">FLIGHT DELAY ANALYSIS</h1>
+        <p style="
+            color:#ffffff; 
+            font-size:16px;
+            margin-bottom:30px;
+            padding:0;
+        ">Port Authority of New York & New Jersey • Jun - Dec 2024</p>
+    </div>
+    """, unsafe_allow_html=True)
+
+with header_right:
+    f1, f2 = st.columns(2)
 
 # ------------------------ LOAD DATA ------------------------
 @st.cache_data
@@ -34,54 +66,11 @@ def load_data():
 
 flights_df, airports_df, airlines_df, aircrafts_df = load_data()
 
-# ------------------------ FILTER SECTION ------------------------
-st.sidebar.markdown("""
-<div style="display:flex; align-items:center; gap:8px;">
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
-         xmlns="http://www.w3.org/2000/svg">
-        <path d="M3 4H21L14 12V19L10 21V12L3 4Z"
-              stroke="black" stroke-width="2"
-              stroke-linecap="round" stroke-linejoin="round"/>
-    </svg>
-    <span style="font-size:18px; font-weight:600; color:black;">
-        Filters
-    </span>
-</div>
-""", unsafe_allow_html=True)
-
-st.markdown("""
-<style>
-span[data-baseweb="tag"] {
-    background-color: #4ca0dd !important; 
-    color: white !important; 
-    border-radius: 12px !important;
-}
-
-span[data-baseweb="tag"]:hover {
-    background-color: #3b82c4 !important;
-}
-
-span[data-baseweb="tag"] svg {
-    fill: white !important;
-}
-
-li[role="option"][aria-selected="true"] {
-    background-color: #4ca0dd !important;
-    color: white !important;
-}
-
-li[role="option"]:hover {
-    background-color: #3b82c4 !important;
-    color: white !important;
-}
-</style>
-""", unsafe_allow_html=True)
-
-# Mapping 
+# ------------------------ MAPPING & SESSION STATE ------------------------
 airport_name_map = airports_df.set_index("airport_code")["name"].to_dict()
 airline_name_map = airlines_df.set_index("airline_id")["airline"].to_dict()
 
-# --- AIRPORT FILTER ---
+# Airport filter session state
 airport_list = sorted(flights_df["origin"].unique())
 available_airports = [-1] + airport_list  # -1 = All
 
@@ -90,6 +79,16 @@ if "airport_max_sel" not in st.session_state:
 if "selected_airports" not in st.session_state:
     st.session_state.selected_airports = [-1]
 
+# Airline filter session state
+airline_list = sorted(flights_df["airline_id"].unique())
+available_airlines = [-1] + airline_list  # -1 = All
+
+if "airline_max_sel" not in st.session_state:
+    st.session_state.airline_max_sel = len(available_airlines)
+if "selected_airlines" not in st.session_state:
+    st.session_state.selected_airlines = [-1]
+
+# ------------------------ FILTER CALLBACK LOGIC ------------------------
 def airport_select_logic():
     sel = st.session_state.airport_filter
     if -1 in sel or len(sel) == 0:
@@ -98,32 +97,6 @@ def airport_select_logic():
     else:
         st.session_state.selected_airports = sel
         st.session_state.airport_max_sel = len(available_airports)
-
-with st.sidebar:
-    st.multiselect(
-        "Select Airport(s)",
-        options=available_airports,
-        default=st.session_state.selected_airports,
-        key="airport_filter",
-        format_func=lambda x: "All" if x == -1 else airport_name_map.get(x, x),
-        max_selections=st.session_state.airport_max_sel,
-        on_change=airport_select_logic
-    )
-
-airport_filter_values = (
-    airport_list
-    if -1 in st.session_state.selected_airports
-    else st.session_state.selected_airports
-)
-
-# --- AIRLINE FILTER ---
-airline_list = sorted(flights_df["airline_id"].unique())
-available_airlines = [-1] + airline_list  # -1 = All
-
-if "airline_max_sel" not in st.session_state:
-    st.session_state.airline_max_sel = len(available_airlines)
-if "selected_airlines" not in st.session_state:
-    st.session_state.selected_airlines = [-1]
 
 def airline_select_logic():
     sel = st.session_state.airline_filter
@@ -134,9 +107,21 @@ def airline_select_logic():
         st.session_state.selected_airlines = sel
         st.session_state.airline_max_sel = len(available_airlines)
 
-with st.sidebar:
+# ------------------------ MULTISELECT FILTERS ------------------------
+with f1:
     st.multiselect(
-        "Select Airline(s)",
+        "Airport",
+        options=available_airports,
+        default=st.session_state.selected_airports,
+        key="airport_filter",
+        format_func=lambda x: "All" if x == -1 else airport_name_map.get(x, x),
+        max_selections=st.session_state.airport_max_sel,
+        on_change=airport_select_logic
+    )
+
+with f2:
+    st.multiselect(
+        "Airline",
         options=available_airlines,
         default=st.session_state.selected_airlines,
         key="airline_filter",
@@ -145,18 +130,21 @@ with st.sidebar:
         on_change=airline_select_logic
     )
 
+# ------------------------ APPLY FILTER ------------------------
+airport_filter_values = (
+    airport_list if -1 in st.session_state.selected_airports
+    else st.session_state.selected_airports
+)
+
 airline_filter_values = (
-    airline_list
-    if -1 in st.session_state.selected_airlines
+    airline_list if -1 in st.session_state.selected_airlines
     else st.session_state.selected_airlines
 )
 
-# Apply filter
 filtered_df = flights_df[
     (flights_df["origin"].isin(airport_filter_values)) &
     (flights_df["airline_id"].isin(airline_filter_values))
 ]
-
 
 # ------------------------ KPI ------------------------
 # Total cancelations
@@ -285,8 +273,18 @@ fig_map.update_layout(
     map_style="carto-positron",
     margin={"r": 0, "t": 0, "l": 0, "b": 0},
     coloraxis_colorbar=dict(
-        title="Delay Rate (%)"
-    )
+        title="Delay Rate (%)",
+        title_font=dict(
+            color="#393939",   # warna judul colorbar
+            size=14,
+            family="Arial"
+        ),
+        thickness=15,           
+        len=0.6,               
+        y=0.5,               
+        yanchor='middle'  
+    ),
+    paper_bgcolor='rgba(245, 245, 245, 0)' 
 )
 
 fig_map.update_traces(
@@ -326,13 +324,18 @@ col_left, col_right = st.columns(2, gap="medium")
 
 # LEFT: MAP
 with col_left:
-    st.subheader("Airport Delay Performance")
+    st.markdown(
+        '<h3 style="color:#ffffff;">Airport Delay Performance</h3>',
+        unsafe_allow_html=True
+    )
     st.plotly_chart(fig_map, use_container_width=True)
 
 # RIGHT: DELAY TREND 
 with col_right:
-    st.subheader("Monthly Delay Rate Trend")
-
+    st.markdown(
+        '<h3 style="color:#ffffff;">Monthly Delay Rate Trend</h3>',
+        unsafe_allow_html=True
+    )
     fig_trend = px.line(
         delay_trend,
         x="month",
@@ -423,7 +426,7 @@ airline_order_list = airline_order["airline"].tolist()
 with col_right:
     st.markdown(
         '<h4 style="margin-bottom:5px; text-align:center;">'
-        'Flight Delay Categories'
+        'Delay Categories'
         '</h4>',
         unsafe_allow_html=True
     )
@@ -453,9 +456,11 @@ with col_right:
         xaxis_title="Number of Flights",
         yaxis_title=None,
         legend_title="Delay Category",
-        template="plotly_white",
+        template="plotly_white",  # tetap pakai white template
         height=500,
-        margin=dict(l=0, r=0, t=0, b=0)
+        margin=dict(l=0, r=0, t=0, b=0),
+        plot_bgcolor='rgba(0,0,0,0)',  # area di dalam chart
+        paper_bgcolor='rgba(0,0,0,0)'  # area sekitar chart
     )
 
     st.plotly_chart(fig_bar_h, use_container_width=True)
