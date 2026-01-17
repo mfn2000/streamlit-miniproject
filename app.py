@@ -15,12 +15,7 @@ st.markdown("""
     padding-bottom: 2.5rem !important;  
     background-image: linear-gradient(to bottom, #011f4c 0%, #2d74dc 35%, #e9eef6 35%, #e9eef6 100%) !important;
     background-color: #f2f2f2 !important;
-}
-            
-.st-emotion-cache-1jsf23j {
-    font-size: 1rem;
-    color: #ffffff !important;
-}
+}     
             
 .st-bq {
     background-color: #2d74dc;
@@ -55,11 +50,9 @@ with header_right:
 
 st.markdown("""
 <style>
-/* Ubah warna label multiselect */
-div[data-baseweb="select"] > div > div > div:first-child {
+    label[data-testid="stWidgetLabel"] p {
     color: white !important;
-    font-weight: bold;
-    font-size: 16px;
+    font-size: 14px;
 }
 
 span[data-baseweb="tag"] {
