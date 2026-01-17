@@ -276,12 +276,12 @@ fig_map.update_layout(
         title="Delay Rate (%)",
         title_font=dict(
             color="#4E4E4E", 
-            size=14,
+            size=13,
             family="Arial"
         ),
         thickness=15,           
         len=0.6,               
-        y=0.5,               
+        y=0.4,               
         yanchor='middle'  
     ),
     paper_bgcolor='rgba(245, 245, 245, 0)' 
