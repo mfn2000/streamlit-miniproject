@@ -8,8 +8,17 @@ st.set_page_config(
     layout="wide"
 )
 
+st.markdown("""
+<style>
+/* Main app container */
+.st-emotion-cache-zy6yx3 {
+    padding-bottom: 2.5rem !important;  
+}
 
-st.title("Flight Delay Dashboard")
+</style>
+""", unsafe_allow_html=True)
+
+st.title("FLIGHT DELAY ANALYSIS")
 st.caption("Port Authority of New York & New Jersey • Jun - Dec 2024")
 
 # ------------------------ LOAD DATA ------------------------
@@ -385,7 +394,7 @@ table_data = (
     })
 )
 
-col_left, col_right = st.columns([1, 2], gap="medium")
+col_left, col_right = st.columns([1, 2], gap="large")
 
 
 with col_left:
@@ -413,7 +422,7 @@ airline_order_list = airline_order["airline"].tolist()
 
 with col_right:
     st.markdown(
-        '<h4 style="margin-bottom:-10px; text-align:center;">'
+        '<h4 style="margin-bottom:5px; text-align:center;">'
         'Flight Delay Categories'
         '</h4>',
         unsafe_allow_html=True
