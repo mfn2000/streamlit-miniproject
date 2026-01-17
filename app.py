@@ -399,7 +399,6 @@ table_data = (
 
 col_left, col_right = st.columns([1, 2], gap="large")
 
-
 with col_left:
     st.markdown(
         '<h4 style="margin-bottom:5px;">Departed Flights by Airline</h4>',
@@ -411,7 +410,7 @@ with col_left:
         use_container_width=True,
         hide_index=True
     )
-
+# ------------------------ STACKED BAR CHART ------------------------
 # Total departed flights per airline 
 airline_order = (
     bar_data_named
@@ -429,10 +428,7 @@ data_grouped = (
     .sum()
 )
 
-# Hitung persentase per airline
 data_grouped["percent"] = data_grouped.groupby("airline")["total_flights"].transform(lambda x: 100 * x / x.sum())
-
-# Buat label persentase hanya jika total_flights kategori >= 3250
 data_grouped["label"] = data_grouped.apply(
     lambda row: f"{row['percent']:.1f}%" if row['total_flights'] >= 3200 else "",
     axis=1
@@ -453,7 +449,7 @@ with col_right:
         color="delay_category",
         orientation="h",
         barmode="stack",
-        text="label",  # label cuma muncul untuk percent >= threshold
+        text="label", 
         category_orders={"airline": airline_order_list},
         color_discrete_map={
             "On-time (within 15 min)": "#3c51ad",
@@ -466,7 +462,7 @@ with col_right:
         }
     )
 
-    fig_bar_h.update_traces(textposition='inside')  # label di dalam bar
+    fig_bar_h.update_traces(textposition='inside') 
     fig_bar_h.update_layout(
         xaxis_title="Number of Flights",
         yaxis_title=None,
