@@ -52,6 +52,25 @@ with header_left:
 
 with header_right:
     f1, f2 = st.columns(2)
+st.markdown("""
+<style>
+/* Ubah warna label multiselect */
+div[data-baseweb="select"] > div > div > div:first-child {
+    color: black !important;
+    font-weight: bold;
+    font-size: 16px;
+}
+
+span[data-baseweb="tag"] {
+    background-color: #4ca0dd !important; 
+    color: white !important;
+}
+
+span[data-baseweb="tag"]:hover {
+    background-color: #3b82c4 !important;
+}
+</style>
+""", unsafe_allow_html=True)
 
 # ------------------------ LOAD DATA ------------------------
 @st.cache_data
